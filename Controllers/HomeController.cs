@@ -5,6 +5,7 @@ using WebApplication6.Models;
 
 namespace WebApplication6.Controllers
 {
+    [Area("Manage")]
     public class HomeController : Controller
     {
         AppDbContext _context;
@@ -14,8 +15,22 @@ namespace WebApplication6.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            List<Product> products =await _context.products.ToListAsync();
+            List<Product> products =await _context.products
+                .Include(x=>x.Images)
+                .ToListAsync();
             return View(products);
+        }
+        public async Task<IActionResult> Detail(int? id)
+        {
+            if(id == null)
+            {
+                return BadRequest();
+            }
+            Product product=await _context.products
+                .Include (x=>x.Images)
+                .Include (x=>x.Category)
+                .FirstOrDefaultAsync(p=>p.Id==id);
+            return View(product);
         }
     }
 }
